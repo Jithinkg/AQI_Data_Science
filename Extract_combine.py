@@ -1,4 +1,4 @@
-from Plot_AQI import avg_data_2013,avg_data_2014,avg_data_2015,avg_data_2016
+from Plot_AQI import avg_data
 import requests
 import sys
 import pandas as pd
@@ -6,26 +6,26 @@ from bs4 import BeautifulSoup
 import os
 import csv
 
-def met_data(month, year):
+def met_data(month, year):   #func for scrapping html data as list
     
     file_html = open('Data/Html_Data/{}/{}.html'.format(year,month), 'rb')
     plain_text = file_html.read()       #all text get stored in plain_text
 
     tempD = []
-    finalD = []
+    finalD = []   #list for storing html data
 
-    soup = BeautifulSoup(plain_text, "lxml")
+    soup = BeautifulSoup(plain_text, "lxml")  #Beautiful Soup is a Python package for parsing HTML and XML documents
     for table in soup.findAll('table', {'class': 'medias mensuales numspan'}):  #selecting class:'medias....' in table
-        for tbody in table:
-            for tr in tbody:
+        for tbody in table:   #html format contains tables,tbody
+            for tr in tbody:   #extracting each row
                 a = tr.get_text()
                 tempD.append(a)
 
-    rows = len(tempD) / 15
+    rows = len(tempD) / 15      #anyway 15 cols r there, so diving total list/15 gives no of rows
 
-    for times in range(round(rows)):
+    for times in range(round(rows)):   #iterarting through each row
         newtempD = []
-        for i in range(15):
+        for i in range(15):  #15 cols(features) are there
             newtempD.append(tempD[0])
             tempD.pop(0)
         finalD.append(newtempD)  # finalD is a list having set of list
@@ -50,23 +50,25 @@ def data_combine(year, cs):
     for a in pd.read_csv('Data/Real-Data/real_' + str(year) + '.csv', chunksize=cs):
         df = pd.DataFrame(data=a)
         mylist = df.values.tolist()
+    print(mylist)
     return mylist
 
 
 if __name__ == "__main__":
     if not os.path.exists("Data/Real-Data"):
         os.makedirs("Data/Real-Data")
-    for year in range(2013, 2017):
-        final_data = []
-        with open('Data/Real-Data/real_' + str(year) + '.csv', 'w') as csvfile:
+    for year in range(2013, 2017):#iterarting through each year
+        final_data = []         #new list to store avg of csv file and html data
+        with open('Data/Real-Data/real_' + str(year) + '.csv', 'w') as csvfile:  #if that file doesn't exist ,it will create one
+            
             wr = csv.writer(csvfile, dialect='excel')
             wr.writerow(
-                ['T', 'TM', 'Tm', 'SLP', 'H', 'VV', 'V', 'VM', 'PM 2.5'])
+                ['T', 'TM', 'Tm', 'SLP', 'H', 'VV', 'V', 'VM', 'PM 2.5'])  #giving col names
         for month in range(1, 13):
             temp = met_data(month, year)
-            final_data = final_data + temp
+            final_data = final_data + temp      #finala_data contains the whole year data at the end of for loop
             
-        pm = getattr(sys.modules[__name__], 'avg_data_{}'.format(year))()
+        pm = avg_data(year)         #to get avg pm[2.5] value of that year
 
         if len(pm) == 364:
             pm.insert(364, '-')
