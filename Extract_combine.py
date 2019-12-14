@@ -35,7 +35,7 @@ def met_data(month, year):   #func for scrapping html data as list
     finalD.pop(length - 1)#deleting 1st row that is not needed
     finalD.pop(0)           #deleting last row not needed
 
-    for a in range(len(finalD)):  #removing unnecessary columns
+    for a in range(len(finalD)):  #removing unnecessary columns which are blank or zeros
         finalD[a].pop(6)
         finalD[a].pop(13)
         finalD[a].pop(12)
@@ -57,7 +57,7 @@ def data_combine(year, cs):
 if __name__ == "__main__":
     if not os.path.exists("Data/Real-Data"):
         os.makedirs("Data/Real-Data")
-    for year in range(2013, 2017):#iterarting through each year
+    for year in range(2014, 2017):#iterarting through each year
         final_data = []         #new list to store avg of csv file and html data
         with open('Data/Real-Data/real_' + str(year) + '.csv', 'w') as csvfile:  #if that file doesn't exist ,it will create one
             
@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
         for i in range(len(final_data)-1):
             # final[i].insert(0, i + 1)
-            final_data[i].insert(8, pm[i])
+            final_data[i].insert(8, pm[i])  #inserting pm value to final_data
 
         with open('Data/Real-Data/real_' + str(year) + '.csv', 'a') as csvfile:
             wr = csv.writer(csvfile, dialect='excel')
